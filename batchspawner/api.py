@@ -8,9 +8,10 @@ class BatchSpawnerAPIHandler(APIHandler):
         """POST set user's spawner port number"""
         user = self.current_user
         data = self.get_json_body()
-        port = int(data.get('port', 0))
-        user.spawner.current_port = port
-        self.finish(json.dumps({"message": "BatchSpawner port configured"}))
+        for key, value in data.items():
+            if hasattr(user.spawner, key):
+                setattr(user.spawner, key, value)
+        self.finish(json.dumps({"message": "BatchSpawner data configured"}))
         self.set_status(201)
 
 default_handlers.append((r"/api/batchspawner", BatchSpawnerAPIHandler))
