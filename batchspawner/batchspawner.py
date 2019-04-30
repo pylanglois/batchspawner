@@ -18,6 +18,7 @@ Common attributes of batch submission / resource manager environments will inclu
 import pwd
 import os
 import re
+import shutil
 
 import xml.etree.ElementTree as ET
 
@@ -52,6 +53,13 @@ def format_template(template, *args, **kwargs):
         return Template(template).render(*args, **kwargs)
     return template.format(*args, **kwargs)
 
+def which_cmd(cmd):
+    cmd_list = cmd.split()
+    if cmd_list[0] == 'sudo':
+        cmd_list[1] = shutil.which(cmd_list[1])
+    else:
+        cmd_list[0] = shutil.which(cmd_list[0])
+    return ' '.join(cmd_list)
 
 class BatchSpawnerBase(Spawner):
     """Base class for spawners using resource manager batch job submission mechanisms
@@ -288,6 +296,15 @@ class BatchSpawnerBase(Spawner):
                         format_template(self.batch_cancel_cmd, **subvars)))
         self.log.info('Cancelling job ' + self.job_id + ': ' + cmd)
         yield self.run_command(cmd, env=self.get_env())
+
+    def __init__(self):
+        """init batchspawner"""
+        super().__init__()
+        # resolve the commands absolute path in case spawner
+        # does have PATH in its keep_vars
+        self.batch_submit_cmd = which_cmd(self.batch_submit_cmd)
+        self.batch_query_cmd = which_cmd(self.batch_query_cmd)
+        self.batch_cancel_cmd = which_cmd(self.batch_cancel_cmd)
 
     def load_state(self, state):
         """load job_id from state"""
