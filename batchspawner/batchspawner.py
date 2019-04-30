@@ -194,6 +194,8 @@ class BatchSpawnerBase(Spawner):
 
     @gen.coroutine
     def run_command(self, cmd, input=None, env=None):
+        if env.get('PATH', None) is None:
+            env['PATH'] = os.environ['PATH']
         proc = Subprocess(cmd, shell=True, env=env, stdin=Subprocess.STREAM, stdout=Subprocess.STREAM,stderr=Subprocess.STREAM)
         inbytes = None
         if input:
