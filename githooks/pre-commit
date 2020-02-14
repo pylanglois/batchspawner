@@ -1,0 +1,7 @@
+#!/bin/sh
+
+NOW=$(date +"%Y%d%m%H%M%S")
+MAJOR_MINOR=$(cat major_minor_version)
+
+# Modifier la version avec la date actuelle
+echo "__version__ = '${MAJOR_MINOR}.${NOW}'" > version.py
